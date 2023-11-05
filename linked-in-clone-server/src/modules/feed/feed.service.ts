@@ -10,6 +10,7 @@ export class FeedService {
     @InjectRepository(FeedEntity)
     private feedRepository: Repository<FeedEntity>,
   ) {}
+
   async createFeed(createFeedDto: CreateFeedDto) {
     const result = await this.feedRepository.save(createFeedDto);
     return result ? result : { error: 'could not create' };
