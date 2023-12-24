@@ -7,19 +7,21 @@ import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import * as bcrypt from 'bcrypt';
 import { UserResponse } from './interfaces/create-user.response';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @InjectRepository(UserEntity)
     private authenticationRepository: Repository<UserEntity>,
+    private jwtService: JwtService,
   ) {}
 
   generateHash = (password: string): Observable<string> => {
     return from(bcrypt.hash(password, 12));
   };
 
-  verifyHash = (
+  verifyUserPassword = (
     password: string,
     hashedPassword: string,
   ): Observable<boolean> => {
@@ -46,24 +48,42 @@ export class AuthenticationService {
     );
   }
 
-  async loginUser(
-    loginUserDto: LogInUserDto,
-  ): Observable<UserResponse | { error: string }> {
-    const existingUser = from(
-      await this.authenticationRepository.findOne({
+  validateUser(loginUserDto: LogInUserDto): Observable<UserEntity> {
+    return from(
+      this.authenticationRepository.findOne({
         where: { email: loginUserDto.email },
       }),
+    ).pipe(
+      switchMap((user) => {
+        return this.verifyUserPassword(loginUserDto.password, user.hash).pipe(
+          map((doesUserExist) => {
+            if (doesUserExist) {
+              delete user.hash;
+              return user;
+            }
+          }),
+        );
+      }),
     );
-    if (!existingUser) {
-      return of({ error: 'Invalid email address' });
-    }
-    return this.verifyHash(loginUserDto.password, existingUser.hash).pipe(
-      map((val) => {
-        if (!val) {
-          return { error: 'Invalid password' };
+  }
+
+  loginUser(
+    loginUserDto: LogInUserDto,
+  ): Observable<Promise<{ token?: string } | { error: string }>> {
+    return this.validateUser(loginUserDto).pipe(
+      map(async (existingUser) => {
+        if (!existingUser) {
+          return { error: 'Invalid email or password' };
         }
-        delete existingUser.hash;
-        return existingUser;
+        return {
+          token: await this.jwtService.signAsync(
+            {
+              sub: existingUser.id,
+              email: existingUser.email,
+            },
+            { secret: process.env.JWT_SECRET, expiresIn: 3600 },
+          ),
+        };
       }),
     );
   }

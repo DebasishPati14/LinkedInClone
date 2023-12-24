@@ -3,13 +3,15 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { FeedModule } from './modules/feed/feed.module';
+import { Environment } from './env/env';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: [new Environment().getEnvFilePath()],
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
