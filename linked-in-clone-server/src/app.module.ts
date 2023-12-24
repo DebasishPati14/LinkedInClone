@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { Environment } from './env/env';
@@ -27,7 +24,5 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     FeedModule,
     AuthenticationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

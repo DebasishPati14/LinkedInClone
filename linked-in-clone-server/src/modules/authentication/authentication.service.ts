@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto, LogInUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, LogInUserDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
-import { Observable, from, of } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import * as bcrypt from 'bcrypt';
 import { UserResponse } from './interfaces/create-user.response';
@@ -21,10 +21,7 @@ export class AuthenticationService {
     return from(bcrypt.hash(password, 12));
   };
 
-  verifyUserPassword = (
-    password: string,
-    hashedPassword: string,
-  ): Observable<boolean> => {
+  verifyUserPassword = (password: string, hashedPassword: string): Observable<boolean> => {
     return from(bcrypt.compare(password, hashedPassword));
   };
 
@@ -41,6 +38,7 @@ export class AuthenticationService {
           map((user: UserResponse) => {
             delete user.hash;
             delete user.password;
+            delete user.id;
             return user;
           }),
         );
@@ -67,9 +65,7 @@ export class AuthenticationService {
     );
   }
 
-  loginUser(
-    loginUserDto: LogInUserDto,
-  ): Observable<Promise<{ token?: string } | { error: string }>> {
+  loginUser(loginUserDto: LogInUserDto): Observable<Promise<{ token?: string } | { error: string }>> {
     return this.validateUser(loginUserDto).pipe(
       map(async (existingUser) => {
         if (!existingUser) {
@@ -86,21 +82,5 @@ export class AuthenticationService {
         };
       }),
     );
-  }
-
-  findAllUsers() {
-    return `This action returns all User`;
-  }
-
-  findOneUserById(id: string) {
-    return `This action returns a #${id} User`;
-  }
-
-  updateUserById(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} authentication`;
-  }
-
-  deleteUserById(id: string) {
-    return `This action removes a #${id} authentication`;
   }
 }

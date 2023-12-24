@@ -3,6 +3,7 @@ import { CreateFeedDto, UpdateFeedDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FeedEntity } from './entities/feed.entity';
+import { CONSTANTS } from 'src/common/constant';
 
 @Injectable()
 export class FeedService {
@@ -13,7 +14,7 @@ export class FeedService {
 
   async createFeed(createFeedDto: CreateFeedDto) {
     const result = await this.feedRepository.save(createFeedDto);
-    return result ? result : { error: 'could not create' };
+    return result ? result : { error: CONSTANTS.feedErrorMessage };
   }
 
   async findAllFeeds() {
@@ -21,25 +22,21 @@ export class FeedService {
     const result = await this.feedRepository.find({
       order: { createdAt: 'DESC' },
     });
-    return result ? { count, result } : { error: 'No data found.' };
+    return result ? { count, result } : { error: CONSTANTS.feedErrorMessage };
   }
 
   async findFeedById(id: string) {
     const result = await this.feedRepository.findOneBy({ id });
-    return result ? result : { error: 'No data found with given id.' };
+    return result ? result : { error: CONSTANTS.feedErrorMessage };
   }
 
   async updateFeedById(id: string, updateFeedDto: UpdateFeedDto) {
     const result = await this.feedRepository.update(id, updateFeedDto);
-    return result
-      ? result
-      : { error: 'No data found to update with given id.' };
+    return result.affected > 0 ? { success: CONSTANTS.successMessage } : { error: CONSTANTS.feedErrorMessage };
   }
 
   async deleteFeedById(id: string) {
     const result = await this.feedRepository.delete(id);
-    return result
-      ? result
-      : { error: 'No data found to delete with given id.' };
+    return result.affected > 0 ? { success: CONSTANTS.successMessage } : { error: CONSTANTS.feedErrorMessage };
   }
 }

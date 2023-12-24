@@ -18,10 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'JwtGuard') {
     });
   }
 
-  validate(requestPaylod: {
-    sub: string;
-    email: string;
-  }): Observable<UserEntity> {
+  validate(requestPaylod: { sub: string; email: string }): Observable<UserEntity> {
     return from(
       this.authRepository.findOne({
         where: {
