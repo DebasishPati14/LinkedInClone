@@ -1,9 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateFeedDto {
+export class CreateFeedRequest {
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   post: string;
 }

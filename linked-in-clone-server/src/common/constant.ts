@@ -10,8 +10,10 @@ export const CONSTANTS = {
   // Response Message
   feedErrorMessage: 'No feed found with given Id',
   userErrorMessage: 'No User found with given Id',
+  invalidCredentialErrorMessage: 'No User found with given Id',
   defaultErrorMessage: 'Server Error!',
-
+  badRequest: 'Bad request!',
+  passwordsNotMatching: 'Password and Confirm Password should be same.',
   successMessage: 'Operation Successful!',
 };
 
@@ -24,3 +26,5 @@ export class ErrorResponse {
   @ApiProperty()
   error: string;
 }
+
+export const ROLES_KEY = 'roles';

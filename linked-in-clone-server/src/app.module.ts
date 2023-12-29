@@ -4,6 +4,7 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
 import { FeedModule } from './modules/feed/feed.module';
 import { Environment } from './env/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     FeedModule,
     AuthenticationModule,
+    UserModule,
   ],
 })
 export class AppModule {}

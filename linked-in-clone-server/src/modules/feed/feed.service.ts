@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateFeedDto, UpdateFeedDto } from './dto';
+import { CreateFeedRequest, UpdateFeedPostRequest } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FeedEntity } from './entities/feed.entity';
 import { CONSTANTS } from 'src/common/constant';
+import { Observable, from } from 'rxjs';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class FeedService {
@@ -12,9 +14,12 @@ export class FeedService {
     private feedRepository: Repository<FeedEntity>,
   ) {}
 
-  async createFeed(createFeedDto: CreateFeedDto) {
-    const result = await this.feedRepository.save(createFeedDto);
-    return result ? result : { error: CONSTANTS.feedErrorMessage };
+  async createFeed(createFeedDto: CreateFeedRequest, user: UserEntity) {
+    const feedPostData = {
+      post: createFeedDto.post,
+      author: user,
+    };
+    return from(this.feedRepository.save(feedPostData));
   }
 
   async findAllFeeds() {
@@ -25,12 +30,12 @@ export class FeedService {
     return result ? { count, result } : { error: CONSTANTS.feedErrorMessage };
   }
 
-  async findFeedById(id: string) {
-    const result = await this.feedRepository.findOneBy({ id });
-    return result ? result : { error: CONSTANTS.feedErrorMessage };
+  findFeedById(id: string): Observable<FeedEntity> {
+    // return result ? result : { error: CONSTANTS.feedErrorMessage };
+    return from(this.feedRepository.findOne({ where: { id }, relations: ['author'] }));
   }
 
-  async updateFeedById(id: string, updateFeedDto: UpdateFeedDto) {
+  async updateFeedById(id: string, updateFeedDto: UpdateFeedPostRequest) {
     const result = await this.feedRepository.update(id, updateFeedDto);
     return result.affected > 0 ? { success: CONSTANTS.successMessage } : { error: CONSTANTS.feedErrorMessage };
   }
