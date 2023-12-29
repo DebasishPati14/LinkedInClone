@@ -1,52 +1,46 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpStatus,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, HttpCode, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { CreateUserDto, LogInUserDto, UpdateUserDto } from './dto';
+import { ApiResponse } from '@nestjs/swagger';
+import { LoginResponse, SignupResponse } from './types';
+import { Request } from 'express';
+import { CreateUserRequest } from '../user/dto';
+import { LoginUserRequest } from './dto';
 
 @Controller('auth')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('sign-up')
-  createUser(@Body() createUserDto: CreateUserDto) {
-    return this.authenticationService.createUser(createUserDto);
+  @ApiResponse({ status: 200, description: 'Success', type: SignupResponse })
+  createUser(@Body() signupReq: CreateUserRequest, @Req() req: Request) {
+    console.table(req.body);
+    console.log(signupReq);
+
+    return this.authenticationService.signupUser(signupReq);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('log-in')
-  loginUser(@Body() loginDto: LogInUserDto) {
+  @ApiResponse({ status: 200, description: 'Success', type: LoginResponse })
+  loginUser(@Body() loginDto: LoginUserRequest) {
     return this.authenticationService.loginUser(loginDto);
   }
 
-  @Get()
-  findAllUsers() {
-    return this.authenticationService.findAllUsers();
-  }
+  // @Get(':id')
+  // @ApiResponse({ status: 200, description: 'Success', type: UserResponse })
+  // findOneUser(@Param('id') id: string) {
+  //   return this.authenticationService.findOneUserById(id);
+  // }
 
-  @Get(':id')
-  findOneUser(@Param('id') id: string) {
-    return this.authenticationService.findOneUserById(id);
-  }
+  // @Patch(':id')
+  // @ApiResponse({ status: 200, description: 'Success', type: UserResponse })
+  // updateUserById(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.authenticationService.updateUserById(id, updateUserDto);
+  // }
 
-  @Patch(':id')
-  updateUserById(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.authenticationService.updateUserById(id, updateUserDto);
-  }
-
-  @Delete(':id')
-  deleteUserById(@Param('id') id: string) {
-    return this.authenticationService.deleteUserById(id);
-  }
+  // @Delete(':id')
+  // @ApiResponse({ status: 200, description: 'Success', type: SuccessResponse })
+  // deleteUserById(@Param('id') id: string) {
+  //   return this.authenticationService.deleteUserById(id);
+  // }
 }

@@ -1,13 +1,7 @@
-import { IsDate, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateFeedDto {
+export class CreateFeedRequest {
   @IsNotEmpty()
   @IsString()
   post: string;
-
-  @IsDate()
-  createdAt: string;
-
-  @IsDate()
-  updatedAt: string;
 }

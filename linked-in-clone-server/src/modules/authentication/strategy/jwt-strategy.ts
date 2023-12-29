@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Observable, from, map } from 'rxjs';
+import { UserEntity } from 'src/modules/user/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'JwtGuard') {
@@ -18,21 +17,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'JwtGuard') {
     });
   }
 
-  validate(requestPaylod: {
-    sub: string;
-    email: string;
-  }): Observable<UserEntity> {
-    return from(
-      this.authRepository.findOne({
-        where: {
-          id: requestPaylod.sub,
-        },
-      }),
-    ).pipe(
-      map((user: UserEntity) => {
-        delete user.hash;
-        return user;
-      }),
-    );
+  async validate(requestPaylod: { user: UserEntity }) {
+    const user: UserEntity = await this.authRepository.findOne({
+      where: {
+        id: requestPaylod.user.id,
+      },
+    });
+    delete user.hash;
+    return user;
   }
 }
