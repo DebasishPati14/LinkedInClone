@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export const CONSTANTS = {
+export const CONSTANT_STRINGS = {
   // Swagger Strings
   swaggerTitle: 'LinkedIn Clone Application',
   swaggerDescription: 'Linked In Application API description for future front-end integration',
@@ -13,8 +13,14 @@ export const CONSTANTS = {
   invalidCredentialErrorMessage: 'No User found with given Id',
   defaultErrorMessage: 'Server Error!',
   badRequest: 'Bad request!',
+  unacceptableFileType: 'FileType is not accepted please select ./jpeg/png/jpg type file',
   passwordsNotMatching: 'Password and Confirm Password should be same.',
   successMessage: 'Operation Successful!',
+};
+
+export const CONSTANTS = {
+  validFileMimeTypes: ['image/jpeg', 'image/jpg', 'image/png'],
+  validFileExtensions: ['jpeg', 'jpg', 'png'],
 };
 
 export class SuccessResponse {

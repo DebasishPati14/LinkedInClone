@@ -24,6 +24,9 @@ export class UserEntity {
   @Column()
   hash: string;
 
+  @Column()
+  profilePictureUrl: string;
+
   @Column({ type: 'enum', enum: RolesEnum, default: RolesEnum.USER })
   role: RolesEnum;
 

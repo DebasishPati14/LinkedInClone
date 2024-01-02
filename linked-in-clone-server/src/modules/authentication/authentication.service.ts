@@ -6,7 +6,7 @@ import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { CONSTANTS } from 'src/common/constant';
+import { CONSTANT_STRINGS } from 'src/common/constant';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateUserRequest } from '../user/dto';
 import { UserResponse } from '../user/types';
@@ -30,7 +30,7 @@ export class AuthenticationService {
 
   signupUser(signUpRequest: CreateUserRequest): Observable<SignupResponse> {
     if (signUpRequest.password !== signUpRequest.confirmPassword) {
-      throw new BadRequestException(CONSTANTS.badRequest);
+      throw new BadRequestException(CONSTANT_STRINGS.badRequest);
     }
     return this.generateHash(signUpRequest.password).pipe(
       switchMap((hashedPassword: string): Observable<UserResponse> => {
@@ -79,7 +79,7 @@ export class AuthenticationService {
     return this.validateUser(loginUserDto).pipe(
       map(async (existingUser) => {
         if (!existingUser) {
-          return { error: CONSTANTS.invalidCredentialErrorMessage };
+          return { error: CONSTANT_STRINGS.invalidCredentialErrorMessage };
         }
         return {
           token: await this.jwtService.signAsync(

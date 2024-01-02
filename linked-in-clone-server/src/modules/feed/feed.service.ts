@@ -3,7 +3,7 @@ import { CreateFeedRequest, UpdateFeedPostRequest } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FeedEntity } from './entities/feed.entity';
-import { CONSTANTS } from 'src/common/constant';
+import { CONSTANT_STRINGS } from 'src/common/constant';
 import { Observable, from } from 'rxjs';
 import { UserEntity } from '../user/entities/user.entity';
 
@@ -27,7 +27,7 @@ export class FeedService {
     const result = await this.feedRepository.find({
       order: { createdAt: 'DESC' },
     });
-    return result ? { count, result } : { error: CONSTANTS.feedErrorMessage };
+    return result ? { count, result } : { error: CONSTANT_STRINGS.feedErrorMessage };
   }
 
   findFeedById(id: string): Observable<FeedEntity> {
@@ -37,11 +37,15 @@ export class FeedService {
 
   async updateFeedById(id: string, updateFeedDto: UpdateFeedPostRequest) {
     const result = await this.feedRepository.update(id, updateFeedDto);
-    return result.affected > 0 ? { success: CONSTANTS.successMessage } : { error: CONSTANTS.feedErrorMessage };
+    return result.affected > 0
+      ? { success: CONSTANT_STRINGS.successMessage }
+      : { error: CONSTANT_STRINGS.feedErrorMessage };
   }
 
   async deleteFeedById(id: string) {
     const result = await this.feedRepository.delete(id);
-    return result.affected > 0 ? { success: CONSTANTS.successMessage } : { error: CONSTANTS.feedErrorMessage };
+    return result.affected > 0
+      ? { success: CONSTANT_STRINGS.successMessage }
+      : { error: CONSTANT_STRINGS.feedErrorMessage };
   }
 }

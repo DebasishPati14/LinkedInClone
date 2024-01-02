@@ -16,6 +16,10 @@ export class UpdateUserRequest extends PartialType(CreateUserRequest) {
   lastName?: string;
 
   @IsOptional()
+  @ApiPropertyOptional()
+  profilePictureUrl?: string;
+
+  @IsOptional()
   @IsEmail()
   @ApiPropertyOptional()
   email?: string;

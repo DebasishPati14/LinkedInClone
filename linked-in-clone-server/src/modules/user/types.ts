@@ -6,6 +6,7 @@ export interface UserResponse {
   firstName: string;
   lastName: string;
   role?: RolesEnum;
+  profilePictureUrl?: RolesEnum;
   id: string;
   feedPosts: FeedPostResponse[];
 }

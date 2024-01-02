@@ -5,6 +5,7 @@ import { FeedModule } from './modules/feed/feed.module';
 import { Environment } from './env/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
       envFilePath: [new Environment().getEnvFilePath()],
       isGlobal: true,
     }),
+    MulterModule.register({ dest: '/images' }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATABASE_HOST,

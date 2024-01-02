@@ -1,7 +1,10 @@
-import { Controller, Get, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Delete, UseGuards, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtGuard } from '../authentication/guards/jwt.guard';
 import { RolesGuard } from '../authentication/guards/roles.guard';
+import { GetUser } from 'src/common/decorator/get-user.decorator';
+import { saveImageConfig } from 'src/common/upload-image';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
 @Controller('user')
@@ -19,10 +22,12 @@ export class UserController {
     return this.userService.findUserById(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Post('save-profile-image')
+  @UseInterceptors(FileInterceptor('file', saveImageConfig))
+  uploadFile(@GetUser() user, @UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+    this.userService.saveUserProfilePicture(user, file.filename);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

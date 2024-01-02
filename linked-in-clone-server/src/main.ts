@@ -3,7 +3,9 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { Environment } from './env/env';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { CONSTANTS } from './common/constant';
+import { CONSTANT_STRINGS } from './common/constant';
+import { join } from 'path';
+import * as express from 'express';
 
 new Environment().setConfig();
 async function bootstrap() {
@@ -15,12 +17,15 @@ async function bootstrap() {
     }),
   );
 
+  // Serve Images Statically
+  app.use('/images', express.static(join(__dirname, '..', 'user-profile-pictures')));
+
   // SWAGGER CONFIGURATION
   const config = new DocumentBuilder()
-    .setTitle(CONSTANTS.swaggerTitle)
-    .setDescription(CONSTANTS.swaggerDescription)
-    .setVersion(CONSTANTS.swaggerVersion)
-    .addTag(CONSTANTS.swaggerTag)
+    .setTitle(CONSTANT_STRINGS.swaggerTitle)
+    .setDescription(CONSTANT_STRINGS.swaggerDescription)
+    .setVersion(CONSTANT_STRINGS.swaggerVersion)
+    .addTag(CONSTANT_STRINGS.swaggerTag)
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
