@@ -6,6 +6,8 @@ import { Environment } from './env/env';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { APP_FILTER } from '@nestjs/core';
+import { ErrorFilter } from './common/error-filter';
 
 @Module({
   imports: [
@@ -27,6 +29,12 @@ import { MulterModule } from '@nestjs/platform-express';
     FeedModule,
     AuthenticationModule,
     UserModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ErrorFilter,
+    },
   ],
 })
 export class AppModule {}

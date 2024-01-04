@@ -6,6 +6,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CONSTANT_STRINGS } from './common/constant';
 import { join } from 'path';
 import * as express from 'express';
+import * as fs from 'fs';
+import * as morgan from 'morgan';
+
+const apiLogStream = fs.createWriteStream('api.log', { flags: 'a' });
 
 new Environment().setConfig();
 async function bootstrap() {
@@ -26,6 +30,9 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  // Logging API record
+  app.use(morgan('combined', { stream: apiLogStream }));
 
   await app.listen(process.env.SERVER_PORT);
 }

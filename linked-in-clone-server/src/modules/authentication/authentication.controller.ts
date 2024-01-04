@@ -1,8 +1,7 @@
-import { Controller, Post, Body, HttpStatus, HttpCode, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { LoginResponse, SignupResponse } from './types';
-import { Request } from 'express';
 import { CreateUserRequest } from '../user/dto';
 import { LoginUserRequest } from './dto';
 
@@ -12,10 +11,7 @@ export class AuthenticationController {
 
   @Post('sign-up')
   @ApiResponse({ status: 200, description: 'Success', type: SignupResponse })
-  createUser(@Body() signupReq: CreateUserRequest, @Req() req: Request) {
-    console.table(req.body);
-    console.log(signupReq);
-
+  createUser(@Body() signupReq: CreateUserRequest) {
     return this.authenticationService.signupUser(signupReq);
   }
 

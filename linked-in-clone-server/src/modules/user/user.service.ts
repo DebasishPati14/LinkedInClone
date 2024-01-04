@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserEntity } from './entities/user.entity';
 import { Observable, from, map, of, switchMap } from 'rxjs';
 import { Repository } from 'typeorm';
@@ -19,7 +19,7 @@ export class UserService {
     private friendRequestRepository: Repository<FriendRequestEntity>,
   ) {}
 
-  findAll() {
+  findAll(): Observable<UserEntity[]> {
     return from(
       this.userRepository.find({ relations: ['feedPosts'], select: ['id', 'firstName', 'lastName', 'email', 'role'] }),
     ).pipe(
@@ -42,7 +42,10 @@ export class UserService {
     ).pipe(
       map((user) => {
         if (!user) {
-          return null;
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.userErrorMessage, status: HttpStatus.BAD_REQUEST },
+            HttpStatus.BAD_REQUEST,
+          );
         }
         return user;
       }),
@@ -66,7 +69,10 @@ export class UserService {
     return from(this.userRepository.update(id, updateUserRecord)).pipe(
       map((user) => {
         if (!user) {
-          return null;
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.userErrorMessage, status: HttpStatus.BAD_REQUEST },
+            HttpStatus.BAD_REQUEST,
+          );
         }
         return user;
       }),
@@ -78,15 +84,24 @@ export class UserService {
     reqBody: ResponseFriendRequestBody,
   ): Observable<SuccessResponse | ErrorResponse> {
     return from(
-      this.friendRequestRepository.findOneBy({
-        id: reqBody.requestId,
-        receiver: currentUser,
+      this.friendRequestRepository.findOne({
+        where: { id: reqBody.requestId },
+        relations: ['receiver'],
       }),
     ).pipe(
-      switchMap((senderInstance: FriendRequestEntity) => {
-        if (!senderInstance) {
-          return of({ error: CONSTANT_STRINGS.sendFriendRequestError });
+      switchMap((friendRequest: FriendRequestEntity) => {
+        if (!friendRequest) {
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.noRecordExists, status: HttpStatus.UNPROCESSABLE_ENTITY },
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          );
         } else {
+          if (friendRequest.receiver.id !== currentUser.id) {
+            throw new HttpException(
+              { message: CONSTANT_STRINGS.notAllowedToOperate, status: HttpStatus.UNPROCESSABLE_ENTITY },
+              HttpStatus.UNPROCESSABLE_ENTITY,
+            );
+          }
           return from(this.friendRequestRepository.update({ id: reqBody.requestId }, { status: reqBody.status })).pipe(
             map(() => {
               return { success: CONSTANT_STRINGS.successMessage };
@@ -110,8 +125,14 @@ export class UserService {
   }
 
   receivedFriendRequestDetail(currentUser: UserEntity, requestId: number): Observable<FriendRequestResponse> {
-    return from(this.friendRequestRepository.findOne({ where: { id: +requestId } })).pipe(
+    return from(this.friendRequestRepository.findOne({ where: { id: +requestId, sender: currentUser } })).pipe(
       map((friendRequestEntities: FriendRequestEntity) => {
+        if (!friendRequestEntities) {
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.badRequest, status: HttpStatus.BAD_REQUEST },
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          );
+        }
         return friendRequestEntities;
       }),
     );
@@ -132,9 +153,12 @@ export class UserService {
     );
   }
 
-  sendFriendRequest(sendUser: UserEntity, receiverId: string): Observable<FriendRequestResponse | { error: string }> {
+  sendFriendRequest(sendUser: UserEntity, receiverId: string): Observable<FriendRequestResponse> {
     if (sendUser.id === receiverId) {
-      return of({ error: CONSTANT_STRINGS.sameUserFriendRequestError });
+      throw new HttpException(
+        { message: CONSTANT_STRINGS.sameUserFriendRequestError, status: HttpStatus.BAD_REQUEST },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return this.findUserById(receiverId).pipe(
@@ -142,7 +166,10 @@ export class UserService {
         return this.hasFriendRequestBefore(sendUser, receiverDetail).pipe(
           switchMap((hasSent: boolean) => {
             if (hasSent) {
-              return of({ error: CONSTANT_STRINGS.sendFriendRequestError });
+              throw new HttpException(
+                { message: CONSTANT_STRINGS.sendFriendRequestError, status: HttpStatus.BAD_REQUEST },
+                HttpStatus.BAD_REQUEST,
+              );
             }
             return from(
               this.friendRequestRepository.save({ sender: sendUser, receiver: receiverDetail, status: 'pending' }),

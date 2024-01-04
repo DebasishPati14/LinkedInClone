@@ -10,9 +10,12 @@ export const CONSTANT_STRINGS = {
   // Response Message
   feedErrorMessage: 'No feed found with given Id',
   userErrorMessage: 'No User found with given Id',
-  invalidCredentialErrorMessage: 'No User found with given Id',
+  invalidCredentialErrorMessage: 'Invalid Credentials were given .',
+  recordExists: 'Existing Record found  with this data.',
+  noRecordExists: 'No Record found  with this data.',
   defaultErrorMessage: 'Server Error!',
   badRequest: 'Bad request!',
+  notAllowedToOperate: 'Not allowed for operation.',
   unacceptableFileType: 'FileType is not accepted please select ./jpeg/png/jpg type file',
   passwordsNotMatching: 'Password and Confirm Password should be same.',
   successMessage: 'Operation Successful!',

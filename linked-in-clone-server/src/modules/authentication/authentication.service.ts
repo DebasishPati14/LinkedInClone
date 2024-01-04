@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginUserRequest } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,7 +16,7 @@ import { SignupResponse } from './types';
 export class AuthenticationService {
   constructor(
     @InjectRepository(UserEntity)
-    private authenticationRepository: Repository<UserEntity>,
+    private userRepository: Repository<UserEntity>,
     private jwtService: JwtService,
   ) {}
 
@@ -28,25 +28,47 @@ export class AuthenticationService {
     return from(bcrypt.compare(password, hashedPassword));
   };
 
+  findUser(email: string): Observable<UserEntity | null> {
+    return from(
+      this.userRepository.findOne({
+        where: { email },
+      }),
+    ).pipe(
+      switchMap((user) => {
+        if (!user) {
+          return of(null);
+        }
+        return of(user);
+      }),
+    );
+  }
+
   signupUser(signUpRequest: CreateUserRequest): Observable<SignupResponse> {
-    if (signUpRequest.password !== signUpRequest.confirmPassword) {
-      throw new BadRequestException(CONSTANT_STRINGS.badRequest);
-    }
-    return this.generateHash(signUpRequest.password).pipe(
-      switchMap((hashedPassword: string): Observable<UserResponse> => {
-        return from(
-          this.authenticationRepository.save({
-            ...signUpRequest,
-            hash: hashedPassword,
-          }),
-        ).pipe(
-          map((user: any) => {
-            delete user.hash;
-            delete user.role;
-            delete user.password;
-            delete user.confirmPassword;
-            delete user.id;
-            return user;
+    return this.findUser(signUpRequest.email).pipe(
+      switchMap((user) => {
+        if (user) {
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.recordExists, status: HttpStatus.BAD_REQUEST },
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        return this.generateHash(signUpRequest.password).pipe(
+          switchMap((hashedPassword: string): Observable<UserResponse> => {
+            return from(
+              this.userRepository.save({
+                ...signUpRequest,
+                hash: hashedPassword,
+              }),
+            ).pipe(
+              map((user: any) => {
+                delete user.hash;
+                delete user.role;
+                delete user.password;
+                delete user.confirmPassword;
+                delete user.id;
+                return user;
+              }),
+            );
           }),
         );
       }),
@@ -54,14 +76,13 @@ export class AuthenticationService {
   }
 
   validateUser(loginUserDto: LoginUserRequest): Observable<UserEntity> {
-    return from(
-      this.authenticationRepository.findOne({
-        where: { email: loginUserDto.email },
-      }),
-    ).pipe(
+    return this.findUser(loginUserDto.email).pipe(
       switchMap((user) => {
         if (!user) {
-          return of(null);
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.invalidCredentialErrorMessage, status: HttpStatus.NOT_FOUND },
+            HttpStatus.BAD_REQUEST,
+          );
         }
         return this.verifyUserPassword(loginUserDto.password, user.hash).pipe(
           map((doesUserExist) => {
@@ -75,11 +96,14 @@ export class AuthenticationService {
     );
   }
 
-  loginUser(loginUserDto: LoginUserRequest): Observable<Promise<{ token?: string } | { error: string }>> {
+  loginUser(loginUserDto: LoginUserRequest): Observable<Promise<{ token?: string }>> {
     return this.validateUser(loginUserDto).pipe(
       map(async (existingUser) => {
         if (!existingUser) {
-          return { error: CONSTANT_STRINGS.invalidCredentialErrorMessage };
+          throw new HttpException(
+            { message: CONSTANT_STRINGS.userErrorMessage, status: HttpStatus.UNAUTHORIZED },
+            HttpStatus.UNAUTHORIZED,
+          );
         }
         return {
           token: await this.jwtService.signAsync(
