@@ -16,6 +16,8 @@ export const CONSTANT_STRINGS = {
   unacceptableFileType: 'FileType is not accepted please select ./jpeg/png/jpg type file',
   passwordsNotMatching: 'Password and Confirm Password should be same.',
   successMessage: 'Operation Successful!',
+  sameUserFriendRequestError: 'Can not sent to yourself!',
+  sendFriendRequestError: 'Request is already there between both of you!',
 };
 
 export const CONSTANTS = {

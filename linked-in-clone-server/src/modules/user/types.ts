@@ -10,3 +10,13 @@ export interface UserResponse {
   id: string;
   feedPosts: FeedPostResponse[];
 }
+
+export interface FriendRequestResponse {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role?: RolesEnum;
+  profilePictureUrl?: RolesEnum;
+  id: string;
+  feedPosts: FeedPostResponse[];
+}

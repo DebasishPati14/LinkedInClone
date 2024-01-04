@@ -1,5 +1,6 @@
 import { FeedEntity } from 'src/modules/feed/entities/feed.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { FriendRequestEntity } from './friend-request.entity';
 
 export enum RolesEnum {
   USER = 'user',
@@ -24,7 +25,7 @@ export class UserEntity {
   @Column()
   hash: string;
 
-  @Column()
+  @Column({ default: '' })
   profilePictureUrl: string;
 
   @Column({ type: 'enum', enum: RolesEnum, default: RolesEnum.USER })
@@ -32,4 +33,10 @@ export class UserEntity {
 
   @OneToMany(() => FeedEntity, (feedDetails) => feedDetails.author)
   feedPosts: FeedEntity[];
+
+  @OneToMany(() => FriendRequestEntity, (friendRequestDetail) => friendRequestDetail.sender)
+  sentFriendRequests: FriendRequestEntity[];
+
+  @OneToMany(() => FriendRequestEntity, (friendRequestDetail) => friendRequestDetail.receiver)
+  receivedFriendRequests: FriendRequestEntity[];
 }

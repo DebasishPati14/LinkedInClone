@@ -11,11 +11,7 @@ new Environment().setConfig();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe());
 
   // Serve Images Statically
   app.use('/images', express.static(join(__dirname, '..', 'user-profile-pictures')));

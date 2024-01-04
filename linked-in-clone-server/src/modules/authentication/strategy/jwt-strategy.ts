@@ -24,6 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'JwtGuard') {
       },
     });
     delete user.hash;
+
     return user;
   }
 }
